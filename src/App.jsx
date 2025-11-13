@@ -798,7 +798,32 @@ export default function DynamicQRFormBuilder() {
             </ul>
           </div>
         </div>
-      </div>
+        
+               {/* More Prominent Footer */}
+<footer className="mt-16 text-center text-gray-700">
+  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-8 border border-purple-200">
+    <div className="max-w-md mx-auto">
+      <p className="text-lg font-semibold text-gray-800 mb-2">
+        Deftmind Technology and Media Ventures
+      </p>
+      <p className="text-sm text-gray-600 mb-3">
+        Innovative solutions for the digital age
+      </p>
+      <p className="text-xs text-gray-500 mb-4">
+        Copyright © {new Date().getFullYear()}. All rights reserved.
+      </p>
+      <a 
+        href="https://deftmindai.com/welcome-to-deftmind-technology-and-media-ventures/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="inline-block bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
+      >
+        Learn More About Us
+      </a>
+    </div>
+  </div>
+</footer>
+    </div>
     </div>
   );
 }
