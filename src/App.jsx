@@ -807,7 +807,7 @@ export default function DynamicQRFormBuilder() {
         Deftmind Technology and Media Ventures
       </p>
       <p className="text-sm text-gray-600 mb-3">
-        Innovative solutions for the digital age
+        ...making technology work for everyone!
       </p>
       <p className="text-xs text-gray-500 mb-4">
         Copyright © {new Date().getFullYear()}. All rights reserved.
