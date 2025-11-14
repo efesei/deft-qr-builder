@@ -800,8 +800,8 @@ export default function DynamicQRFormBuilder() {
         </div>
         
                {/* More Prominent Footer */}
-<footer className="mt-16 text-center text-gray-700">
-  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-8 border border-purple-200">
+<footer className="mt-8 sm:mt-16 text-center text-gray-700">
+  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 sm:p-6 md:p-8 border border-purple-200">
     <div className="max-w-md mx-auto">
       <p className="text-lg font-semibold text-gray-800 mb-2">
         Deftmind Technology and Media Ventures
