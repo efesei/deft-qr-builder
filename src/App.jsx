@@ -781,7 +781,7 @@ export default function DynamicQRFormBuilder() {
           <h3 className="font-semibold text-gray-800 mb-3">📋 How to use:</h3>
           <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
             <li><strong>Build Form:</strong> Add custom fields with names, types, and validation rules</li>
-            <li><strong>Save/Load:</strong> Save form templates for later use or import/export them</li>
+            <li><strong>Save/Load:</strong> Save form templates locally for later use or import/export them from local storage</li>
             <li><strong>Validation:</strong> Set min/max length, patterns, and custom error messages</li>
             <li><strong>Location Fields:</strong> Use the location button to automatically get GPS coordinates</li>
             <li><strong>Fill & Generate:</strong> Switch to fill mode and complete your form with real-time validation</li>
@@ -798,7 +798,32 @@ export default function DynamicQRFormBuilder() {
             </ul>
           </div>
         </div>
-      </div>
+        
+               {/* More Prominent Footer */}
+<footer className="mt-16 text-center text-gray-700">
+  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-8 border border-purple-200">
+    <div className="max-w-md mx-auto">
+      <p className="text-lg font-semibold text-gray-800 mb-2">
+        Deftmind Technology and Media Ventures
+      </p>
+      <p className="text-sm text-gray-600 mb-3">
+        ...making technology work for everyone!
+      </p>
+      <p className="text-xs text-gray-500 mb-4">
+        Copyright © {new Date().getFullYear()}. All rights reserved.
+      </p>
+      <a 
+        href="https://deftmindai.com/welcome-to-deftmind-technology-and-media-ventures/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="inline-block bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
+      >
+        Learn More About Us
+      </a>
+    </div>
+  </div>
+</footer>
+    </div>
     </div>
   );
 }
