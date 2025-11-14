@@ -677,10 +677,11 @@ export default function DynamicQRFormBuilder() {
                         />
                         <button
                           type="button"
+                          onClick={() => getCurrentLocation(field.id)}
                           className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors sm:w-auto w-full"
-  >
-                         📍 Get Location
-                          </button>
+>
+                          📍 Get Location
+                        </button>
                       </div>
                     ) : field.type === 'textarea' ? (
                       <textarea
