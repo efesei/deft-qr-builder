@@ -665,24 +665,24 @@ export default function DynamicQRFormBuilder() {
                     </label>
                     
                     {/* Location Field Special Handling */}
-                    {field.type === 'location' ? (
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                          type="text"
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          value={formData[field.id] || ''}
-                          onChange={(e) => updateFormData(field.id, e.target.value)}
-                          placeholder="Click button to get location or enter coordinates"
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => getCurrentLocation(field.id)}
-                          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors sm:w-auto w-full"
->
-                          📍 Get Location
-                        </button>
-                      </div>
+                     {field.type === 'location' ? (
+  <div className="flex flex-col sm:flex-row gap-2">
+    <input
+      type="text"
+      value={formData[field.id] || ''}
+      onChange={(e) => updateFormData(field.id, e.target.value)}
+      placeholder="Click button to get location or enter coordinates"
+      className="flex-1 px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+    />
+    <button
+      type="button"
+      onClick={() => getCurrentLocation(field.id)}  {/* FIXED: Added onClick */}
+      className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base sm:w-auto w-full"
+    >
+      📍 Get Location
+    </button>
+  </div>
+ // ... rest of your code
                     ) : field.type === 'textarea' ? (
                       <textarea
                         value={formData[field.id] || ''}
