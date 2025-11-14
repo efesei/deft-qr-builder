@@ -404,9 +404,9 @@ export default function DynamicQRFormBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-4 sm:p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Dynamic QR Form Builder
           </h1>
@@ -530,7 +530,7 @@ export default function DynamicQRFormBuilder() {
                             <MoveDown size={16} />
                           </button>
                         </div>
-                        <div className="flex-1 grid grid-cols-2 gap-3">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             type="text"
                             value={field.name}
@@ -582,7 +582,7 @@ export default function DynamicQRFormBuilder() {
                       </div>
 
                       {/* Validation Settings */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                         <div>
                           <label className="block text-xs text-gray-600 mb-1">Min Length</label>
                           <input
@@ -666,9 +666,10 @@ export default function DynamicQRFormBuilder() {
                     
                     {/* Location Field Special Handling */}
                     {field.type === 'location' ? (
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="text"
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                           value={formData[field.id] || ''}
                           onChange={(e) => updateFormData(field.id, e.target.value)}
                           placeholder="Click button to get location or enter coordinates"
@@ -676,11 +677,10 @@ export default function DynamicQRFormBuilder() {
                         />
                         <button
                           type="button"
-                          onClick={() => getCurrentLocation(field.id)}
-                          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          📍 Get Location
-                        </button>
+                          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors sm:w-auto w-full"
+  >
+                         📍 Get Location
+                          </button>
                       </div>
                     ) : field.type === 'textarea' ? (
                       <textarea
@@ -740,8 +740,8 @@ export default function DynamicQRFormBuilder() {
                 <img 
                   src={qrCodeDataUrl} 
                   alt="Generated QR Code" 
-                  className="mx-auto mb-4 border-4 border-white shadow-lg"
-                  style={{ width: '300px', height: '300px' }}
+                  className="mx-auto mb-4 border-4 border-white shadow-lg w-full max-w-[280px] sm:max-w-[300px]"
+                
                 />
                 
                 <div className="text-sm text-gray-600 mb-4 text-left bg-white p-4 rounded border max-h-64 overflow-y-auto">
@@ -757,16 +757,16 @@ export default function DynamicQRFormBuilder() {
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={downloadQRCode}
-                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                    className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                   >
                     Download QR Code
                   </button>
                   <button
                     onClick={resetAll}
-                    className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                    className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                   >
                     Create Another
                   </button>
@@ -777,7 +777,7 @@ export default function DynamicQRFormBuilder() {
         </div>
 
         {/* Enhanced Instructions */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6">
+        <div className="mt-6 bg-white rounded-lg shadow p-4 sm:p-6">
           <h3 className="font-semibold text-gray-800 mb-3">📋 How to use:</h3>
           <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
             <li><strong>Build Form:</strong> Add custom fields with names, types, and validation rules</li>
