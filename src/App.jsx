@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, MoveUp, MoveDown, Save, FolderOpen, Download, Upload } from 'lucide-react';
 
 export default function DynamicQRFormBuilder() {
-  const [mode, setMode] = useState('fill'); // CHANGED: Start in fill mode
+  const [mode, setMode] = useState('fill');
   const [formFields, setFormFields] = useState([]);
   const [formData, setFormData] = useState({});
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
@@ -16,20 +16,12 @@ export default function DynamicQRFormBuilder() {
     if (saved) {
       setSavedForms(JSON.parse(saved));
     }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => console.log('SW registered'))
-        .catch(err => console.log('SW registration failed'));
-    }
   }, []);
 
-  // Save forms to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('deftQR_savedForms', JSON.stringify(savedForms));
   }, [savedForms]);
 
-  // NEW: Add field with default name
   const addField = () => {
     const fieldNumber = formFields.length + 1;
     const newField = {
@@ -46,14 +38,12 @@ export default function DynamicQRFormBuilder() {
     setFormFields([...formFields, newField]);
   };
 
-  // Update a field's properties
   const updateField = (id, property, value) => {
     setFormFields(formFields.map(field => 
       field.id === id ? { ...field, [property]: value } : field
     ));
   };
 
-  // Delete a field
   const deleteField = (id) => {
     setFormFields(formFields.filter(field => field.id !== id));
     const newFormData = { ...formData };
@@ -61,7 +51,6 @@ export default function DynamicQRFormBuilder() {
     setFormData(newFormData);
   };
 
-  // Move field up
   const moveFieldUp = (index) => {
     if (index === 0) return;
     const newFields = [...formFields];
@@ -69,7 +58,6 @@ export default function DynamicQRFormBuilder() {
     setFormFields(newFields);
   };
 
-  // Move field down
   const moveFieldDown = (index) => {
     if (index === formFields.length - 1) return;
     const newFields = [...formFields];
@@ -77,48 +65,36 @@ export default function DynamicQRFormBuilder() {
     setFormFields(newFields);
   };
 
-  // Validate field input
   const validateField = (fieldId, value, fieldConfig) => {
     const errors = [];
-
     if (fieldConfig.required && (!value || value.trim() === '')) {
       errors.push('This field is required');
     }
-
     if (value) {
       if (fieldConfig.minLength > 0 && value.length < fieldConfig.minLength) {
         errors.push(`Minimum ${fieldConfig.minLength} characters required`);
       }
-
       if (fieldConfig.maxLength > 0 && value.length > fieldConfig.maxLength) {
         errors.push(`Maximum ${fieldConfig.maxLength} characters allowed`);
       }
-
       if (fieldConfig.pattern && !new RegExp(fieldConfig.pattern).test(value)) {
         errors.push(fieldConfig.patternMessage || 'Invalid format');
       }
-
-      // Type-specific validations
       if (fieldConfig.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         errors.push('Please enter a valid email address');
       }
-
       if (fieldConfig.type === 'url' && !/^https?:\/\/.+\..+/.test(value)) {
         errors.push('Please enter a valid URL (include http:// or https://)');
       }
-
       if (fieldConfig.type === 'number' && isNaN(value)) {
         errors.push('Please enter a valid number');
       }
     }
-
     return errors;
   };
 
-  // Update form data with validation
   const updateFormData = (fieldId, value) => {
     setFormData({ ...formData, [fieldId]: value });
-    
     const fieldConfig = formFields.find(f => f.id === fieldId);
     if (fieldConfig) {
       const errors = validateField(fieldId, value, fieldConfig);
@@ -129,13 +105,11 @@ export default function DynamicQRFormBuilder() {
     }
   };
 
-  // Get current location
   const getCurrentLocation = (fieldId) => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser');
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const location = `${position.coords.latitude}, ${position.coords.longitude}`;
@@ -147,51 +121,40 @@ export default function DynamicQRFormBuilder() {
     );
   };
 
-  // NEW: Improved switch to fill mode
   const switchToFillMode = () => {
     if (formFields.length === 0) {
-      // If no fields, add one automatically
       addField();
     }
-    
-    // Ensure all fields have names
     const updatedFields = formFields.map((field, index) => {
       if (!field.name.trim()) {
         return { ...field, name: `Field ${index + 1}` };
       }
       return field;
     });
-    
     if (updatedFields !== formFields) {
       setFormFields(updatedFields);
     }
-    
     setMode('fill');
     setFieldValidations({});
   };
 
-  // Save current form
   const saveForm = () => {
     if (formFields.length === 0) {
       alert('Please add fields to the form before saving');
       return;
     }
-
     const formName = prompt('Enter a name for this form:');
     if (!formName) return;
-
     const formTemplate = {
       id: Date.now(),
       name: formName,
       fields: formFields,
       createdAt: new Date().toISOString()
     };
-
     setSavedForms(prev => [...prev, formTemplate]);
     alert(`Form "${formName}" saved successfully!`);
   };
 
-  // Load saved form
   const loadForm = (formTemplate) => {
     if (confirm(`Load form "${formTemplate.name}"? This will replace your current form.`)) {
       setFormFields(formTemplate.fields);
@@ -201,7 +164,6 @@ export default function DynamicQRFormBuilder() {
     }
   };
 
-  // Delete saved form
   const deleteSavedForm = (formId, e) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this saved form?')) {
@@ -209,17 +171,14 @@ export default function DynamicQRFormBuilder() {
     }
   };
 
-  // Export form template
   const exportForm = () => {
     const formTemplate = {
       name: `Exported Form ${new Date().toLocaleDateString()}`,
       fields: formFields,
       exportedAt: new Date().toISOString()
     };
-
     const dataStr = JSON.stringify(formTemplate, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.download = `deftqr_form_${Date.now()}.json`;
@@ -228,11 +187,9 @@ export default function DynamicQRFormBuilder() {
     URL.revokeObjectURL(url);
   };
 
-  // Import form template
   const importForm = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -251,25 +208,19 @@ export default function DynamicQRFormBuilder() {
       }
     };
     reader.readAsText(file);
-    event.target.value = ''; // Reset input
+    event.target.value = '';
   };
 
-  // Generate QR Code
   const generateQRCode = async () => {
-    // Enhanced validation checking field validations
     const validationErrors = Object.values(fieldValidations).flat();
     const missingFields = formFields.filter(field => 
       field.required && !formData[field.id]?.trim()
     );
-
     if (missingFields.length > 0 || validationErrors.length > 0) {
       alert(`Please fix all validation errors before generating QR code.`);
       return;
     }
-
     setIsGenerating(true);
-
-    // Prepare data for QR code
     const now = new Date();
     const qrData = {
       generatedAt: now.toISOString(),
@@ -279,83 +230,45 @@ export default function DynamicQRFormBuilder() {
         timeStyle: 'medium'
       })
     };
-
-    // Add form data with field names
     formFields.forEach(field => {
       if (formData[field.id]) {
         qrData[field.name] = formData[field.id];
       }
     });
-
-    // Convert to JSON string for QR code
     const qrDataString = JSON.stringify(qrData, null, 2);
-
     try {
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-      
       script.onload = () => {
-        let tempDiv = null; // Define tempDiv outside the inner try
-        try {
-          // 1. Create the hidden div to render the QR code
-          tempDiv = document.createElement('div');
-          tempDiv.style.display = 'none';
-          document.body.appendChild(tempDiv);
-
-          // 2. Initialize the QR code generator
-          new window.QRCode(tempDiv, {
-            text: qrDataString,
-            width: 300,
-            height: 300,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: window.QRCode.CorrectLevel.H
-          });
-
-          // 3. Wait for the QR code to render (as img or canvas)
-          setTimeout(() => {
-            try {
-              const img = tempDiv.querySelector('img');
-              if (img) {
-                setQrCodeDataUrl(img.src);
-              } else {
-                const canvas = tempDiv.querySelector('canvas');
-                if (canvas) {
-                  setQrCodeDataUrl(canvas.toDataURL());
-                } else {
-                  // This will be caught by the inner catch block
-                  throw new Error("QR Code image or canvas not found"); 
-                }
-              }
-            } catch (innerErr) {
-              console.error('Failed to get QR code data URL:', innerErr);
-              alert('Error retrieving generated QR code.');
-            } finally {
-              // 4. (CRITICAL) This *always* runs after the inner try/catch
-              if (tempDiv) {
-                document.body.removeChild(tempDiv);
-              }
-              // 5. (CRITICAL) This stops the "Generating..." message
-              setIsGenerating(false); 
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+        const qr = new window.QRCode(tempDiv, {
+          text: qrDataString,
+          width: 250,
+          height: 250,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: window.QRCode.CorrectLevel.H
+        });
+        setTimeout(() => {
+          const img = tempDiv.querySelector('img');
+          if (img) {
+            setQrCodeDataUrl(img.src);
+          } else {
+            const canvas = tempDiv.querySelector('canvas');
+            if (canvas) {
+              setQrCodeDataUrl(canvas.toDataURL());
             }
-          }, 100); // 100ms delay to allow rendering
-
-        } catch (outerErr) {
-          // 6. Catch errors from 'new window.QRCode'
-          console.error('Failed to initialize QR code generator:', outerErr);
-          alert('Error initializing QR code generator.');
-          if (tempDiv) {
-            document.body.removeChild(tempDiv);
           }
-          setIsGenerating(false); // Also stop loading here
-        }
+          document.body.removeChild(tempDiv);
+          setIsGenerating(false);
+        }, 100);
       };
-
       script.onerror = () => {
-        alert('Failed to load QR code library. Please check your internet connection.');
+        alert('Failed to load QR code library');
         setIsGenerating(false);
       };
-
       document.head.appendChild(script);
     } catch (err) {
       console.error('Error generating QR code:', err);
@@ -364,32 +277,24 @@ export default function DynamicQRFormBuilder() {
     }
   };
 
-  // Download QR Code
   const downloadQRCode = () => {
     if (!qrCodeDataUrl) return;
-    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
     img.onload = () => {
-      canvas.width = 400;
-      canvas.height = 450;
-      
+      canvas.width = 350;
+      canvas.height = 400;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.drawImage(img, 50, 50, 300, 300);
-      
+      ctx.drawImage(img, 25, 25, 300, 300);
       ctx.fillStyle = '#4c1d95';
-      ctx.font = 'bold 18px Arial';
+      ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Deft QR Code Generator', canvas.width / 2, 380);
-      
+      ctx.fillText('Deft QR Code Generator', canvas.width / 2, 345);
       ctx.fillStyle = '#6b7280';
-      ctx.font = '14px Arial';
-      ctx.fillText('by Deftmind Technology and Media Ventures', canvas.width / 2, 405);
-      
+      ctx.font = '12px Arial';
+      ctx.fillText('by Deftmind Technology and Media Ventures', canvas.width / 2, 365);
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -401,24 +306,19 @@ export default function DynamicQRFormBuilder() {
         URL.revokeObjectURL(url);
       });
     };
-    
     img.src = qrCodeDataUrl;
   };
 
-  // Reset everything
   const resetAll = () => {
     setFormData({});
     setQrCodeDataUrl('');
     setFieldValidations({});
   };
 
-  // Character count display
   const getCharacterCount = (fieldId) => {
     const value = formData[fieldId] || '';
     const fieldConfig = formFields.find(f => f.id === fieldId);
-    
     if (!fieldConfig || (!fieldConfig.maxLength && !fieldConfig.minLength)) return null;
-    
     return (
       <div className={`text-xs mt-1 ${
         fieldConfig.maxLength && value.length > fieldConfig.maxLength ? 'text-red-600' : 
@@ -432,36 +332,36 @@ export default function DynamicQRFormBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 p-4 sm:p-6 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 px-2 py-3">
+      <div className="max-w-full mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-3">
+          <h1 className="text-xl font-bold text-gray-800 mb-2 text-center">
             Dynamic QR Form Builder
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-4 text-xs text-center">
             {mode === 'build' 
-              ? 'Create your custom form fields, then fill and generate QR codes'
-              : 'Fill in the form to generate a QR code with your data'}
+              ? 'Create custom forms and generate QR codes'
+              : 'Fill the form to generate QR code with data'}
           </p>
 
           {/* Mode Toggle */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-col gap-2 mb-4">
             <button
               onClick={() => setMode('build')}
-              className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-4 py-3 rounded-lg font-semibold transition-colors text-sm ${
                 mode === 'build' 
                   ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 text-gray-700'
               }`}
             >
               Build Form
             </button>
             <button
               onClick={switchToFillMode}
-              className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+              className={`px-4 py-3 rounded-lg font-semibold transition-colors text-sm ${
                 mode === 'fill' 
                   ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 text-gray-700'
               }`}
             >
               Fill & Generate
@@ -470,16 +370,16 @@ export default function DynamicQRFormBuilder() {
 
           {/* Form Management Bar */}
           {mode === 'build' && (
-            <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex flex-col gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
               <button
                 onClick={saveForm}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                className="flex items-center justify-center gap-2 bg-green-600 text-white px-3 py-3 rounded-lg font-semibold text-sm"
               >
                 <Save size={16} />
                 Save Form
               </button>
               
-              <label className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center gap-2 bg-blue-600 text-white px-3 py-3 rounded-lg font-semibold text-sm cursor-pointer">
                 <Upload size={16} />
                 Import Form
                 <input
@@ -492,7 +392,7 @@ export default function DynamicQRFormBuilder() {
               
               <button
                 onClick={exportForm}
-                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-3 py-3 rounded-lg font-semibold text-sm"
               >
                 <Download size={16} />
                 Export Form
@@ -502,25 +402,25 @@ export default function DynamicQRFormBuilder() {
 
           {/* Saved Forms Panel */}
           {mode === 'build' && savedForms.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-700 mb-2">Saved Forms:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="mb-4">
+              <h3 className="font-semibold text-gray-700 mb-2 text-sm">Saved Forms:</h3>
+              <div className="grid grid-cols-1 gap-2">
                 {savedForms.map((form) => (
                   <div
                     key={form.id}
                     onClick={() => loadForm(form)}
-                    className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       <FolderOpen size={16} className="text-blue-600" />
-                      <span>{form.name}</span>
+                      <span className="text-sm">{form.name}</span>
                       <span className="text-xs text-gray-500">
                         ({form.fields.length} fields)
                       </span>
                     </div>
                     <button
                       onClick={(e) => deleteSavedForm(form.id, e)}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      className="p-1 text-red-600 rounded"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -532,44 +432,44 @@ export default function DynamicQRFormBuilder() {
 
           {/* BUILD MODE */}
           {mode === 'build' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {formFields.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <p className="text-gray-500 mb-4">No fields yet. Add your first field!</p>
+                <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <p className="text-gray-500 mb-3 text-sm">No fields yet.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {formFields.map((field, index) => (
-                    <div key={field.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center gap-3 mb-3">
+                    <div key={field.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-center gap-2 mb-3">
                         <div className="flex flex-col gap-1">
                           <button
                             onClick={() => moveFieldUp(index)}
                             disabled={index === 0}
-                            className="p-1 hover:bg-gray-200 rounded disabled:opacity-30"
+                            className="p-1 bg-white rounded disabled:opacity-30"
                           >
-                            <MoveUp size={16} />
+                            <MoveUp size={14} />
                           </button>
                           <button
                             onClick={() => moveFieldDown(index)}
                             disabled={index === formFields.length - 1}
-                            className="p-1 hover:bg-gray-200 rounded disabled:opacity-30"
+                            className="p-1 bg-white rounded disabled:opacity-30"
                           >
-                            <MoveDown size={16} />
+                            <MoveDown size={14} />
                           </button>
                         </div>
-                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex-1 grid grid-cols-1 gap-2">
                           <input
                             type="text"
                             value={field.name}
                             onChange={(e) => updateField(field.id, 'name', e.target.value)}
-                            placeholder="Field Name (e.g., Driver Code)"
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            placeholder="Field Name"
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                           />
                           <select
                             value={field.type}
                             onChange={(e) => updateField(field.id, 'type', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                           >
                             <option value="text">Text</option>
                             <option value="number">Number</option>
@@ -583,20 +483,19 @@ export default function DynamicQRFormBuilder() {
                         </div>
                         <button
                           onClick={() => deleteField(field.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                          className="p-2 text-red-600 bg-white rounded-lg"
                         >
-                          <Trash2 size={20} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                       
-                      {/* Field Configuration */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <div className="grid grid-cols-1 gap-2 mb-3">
                         <input
                           type="text"
                           value={field.placeholder}
                           onChange={(e) => updateField(field.id, 'placeholder', e.target.value)}
                           placeholder="Placeholder text"
-                          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                         />
                         <label className="flex items-center gap-2 px-3 py-2">
                           <input
@@ -609,8 +508,7 @@ export default function DynamicQRFormBuilder() {
                         </label>
                       </div>
 
-                      {/* Validation Settings */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
                           <label className="block text-xs text-gray-600 mb-1">Min Length</label>
                           <input
@@ -618,7 +516,7 @@ export default function DynamicQRFormBuilder() {
                             min="0"
                             value={field.minLength}
                             onChange={(e) => updateField(field.id, 'minLength', parseInt(e.target.value) || 0)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
                           />
                         </div>
                         <div>
@@ -628,34 +526,10 @@ export default function DynamicQRFormBuilder() {
                             min="0"
                             value={field.maxLength}
                             onChange={(e) => updateField(field.id, 'maxLength', parseInt(e.target.value) || 0)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">Pattern (RegEx)</label>
-                          <input
-                            type="text"
-                            value={field.pattern}
-                            onChange={(e) => updateField(field.id, 'pattern', e.target.value)}
-                            placeholder="e.g., [A-Za-z]+"
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500"
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Pattern Message */}
-                      {field.pattern && (
-                        <div className="mt-2">
-                          <label className="block text-xs text-gray-600 mb-1">Pattern Error Message</label>
-                          <input
-                            type="text"
-                            value={field.patternMessage}
-                            onChange={(e) => updateField(field.id, 'patternMessage', e.target.value)}
-                            placeholder="Custom error message for pattern validation"
                             className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-purple-500 text-sm"
                           />
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -663,9 +537,9 @@ export default function DynamicQRFormBuilder() {
 
               <button
                 onClick={addField}
-                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold text-sm"
               >
-                <Plus size={20} />
+                <Plus size={16} />
                 Add Field
               </button>
             </div>
@@ -673,13 +547,13 @@ export default function DynamicQRFormBuilder() {
 
           {/* FILL MODE */}
           {mode === 'fill' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {formFields.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500 mb-4">No form fields yet.</p>
+                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500 mb-3 text-sm">No form fields yet.</p>
                   <button
                     onClick={addField}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                    className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm"
                   >
                     Add Your First Field
                   </button>
@@ -692,20 +566,19 @@ export default function DynamicQRFormBuilder() {
                       {field.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
                     
-                    {/* Location Field Special Handling */}
                     {field.type === 'location' ? (
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-col gap-2">
                         <input
                           type="text"
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                           value={formData[field.id] || ''}
                           onChange={(e) => updateFormData(field.id, e.target.value)}
-                          placeholder="Click button to get location or enter coordinates"
+                          placeholder="Click button to get location"
+                          className="flex-1 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         />
                         <button
                           type="button"
-                          onClick={() => getCurrentLocation(field.id)} {/* <-- FIXED: Added onClick */}
-                          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors sm:w-auto w-full"
+                          onClick={() => getCurrentLocation(field.id)}
+                          className="px-3 py-3 bg-blue-600 text-white rounded-lg text-sm w-full"
                         >
                           📍 Get Location
                         </button>
@@ -716,7 +589,7 @@ export default function DynamicQRFormBuilder() {
                         onChange={(e) => updateFormData(field.id, e.target.value)}
                         placeholder={field.placeholder}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                       />
                     ) : (
                       <input
@@ -724,7 +597,7 @@ export default function DynamicQRFormBuilder() {
                         value={formData[field.id] || ''}
                         onChange={(e) => updateFormData(field.id, e.target.value)}
                         placeholder={field.placeholder}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                        className={`w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm ${
                           fieldValidations[field.id]?.length > 0 
                             ? 'border-red-500 bg-red-50' 
                             : 'border-gray-300'
@@ -732,12 +605,10 @@ export default function DynamicQRFormBuilder() {
                       />
                     )}
 
-                    {/* Character Count */}
                     {getCharacterCount(field.id)}
 
-                    {/* Validation Errors */}
                     {fieldValidations[field.id]?.map((error, index) => (
-                      <p key={index} className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                      <p key={index} className="text-red-600 text-xs mt-1">
                         ⚠️ {error}
                       </p>
                     ))}
@@ -749,7 +620,7 @@ export default function DynamicQRFormBuilder() {
                 <button
                   onClick={generateQRCode}
                   disabled={isGenerating}
-                  className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:bg-purple-400"
+                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold disabled:bg-purple-400 text-sm"
                 >
                   {isGenerating ? 'Generating...' : 'Generate QR Code'}
                 </button>
@@ -759,42 +630,41 @@ export default function DynamicQRFormBuilder() {
 
           {/* QR Code Display */}
           {qrCodeDataUrl && (
-            <div className="mt-8 border-t pt-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="mt-6 border-t pt-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
                 Generated QR Code
               </h2>
               
-              <div className="bg-gray-50 rounded-lg p-6 text-center">
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <img 
                   src={qrCodeDataUrl} 
                   alt="Generated QR Code" 
-                  className="mx-auto mb-4 border-4 border-white shadow-lg w-full max-w-[280px] sm:max-w-[300px]"
-                
+                  className="mx-auto mb-4 border-4 border-white shadow-lg w-64 h-64"
                 />
                 
-                <div className="text-sm text-gray-600 mb-4 text-left bg-white p-4 rounded border max-h-64 overflow-y-auto">
+                <div className="text-xs text-gray-600 mb-4 text-left bg-white p-3 rounded border max-h-48 overflow-y-auto">
                   {formFields.map(field => (
                     formData[field.id] && (
-                      <p key={field.id}>
+                      <p key={field.id} className="break-words mb-1">
                         <strong>{field.name}:</strong> {formData[field.id]}
                       </p>
                     )
                   ))}
-                  <p className="mt-2 pt-2 border-t">
+                  <p className="mt-2 pt-2 border-t text-xs">
                     <strong>Generated:</strong> {new Date().toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col gap-2">
                   <button
                     onClick={downloadQRCode}
-                    className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                    className="bg-green-600 text-white py-2 px-4 rounded-lg font-semibold text-sm"
                   >
                     Download QR Code
                   </button>
                   <button
                     onClick={resetAll}
-                    className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                    className="bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold text-sm"
                   >
                     Create Another
                   </button>
@@ -804,39 +674,37 @@ export default function DynamicQRFormBuilder() {
           )}
         </div>
 
-        {/* Enhanced Instructions */}
-        <div className="mt-6 bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="font-semibold text-gray-800 mb-3">📋 How to use:</h3>
-          <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
-            <li><strong>Build Form:</strong> Add custom fields with names, types, and validation rules</li>
-            <li><strong>Save/Load:</strong> Save form templates locally for later use or import/export them from local storage</li>
-            <li><strong>Validation:</strong> Set min/max length, patterns, and custom error messages</li>
-            <li><strong>Location Fields:</strong> Use the location button to automatically get GPS coordinates</li>
-            <li><strong>Fill & Generate:</strong> Switch to fill mode and complete your form with real-time validation</li>
-            <li><strong>QR Code:</strong> Generate and download branded QR codes with your data</li>
+        {/* Instructions */}
+        <div className="mt-4 bg-white rounded-lg shadow p-3">
+          <h3 className="font-semibold text-gray-800 mb-2 text-sm">📋 How to use:</h3>
+          <ol className="list-decimal list-inside space-y-1 text-gray-700 text-xs">
+            <li><strong>Build Form:</strong> Add custom fields with validation rules</li>
+            <li><strong>Save/Load:</strong> Save form templates for later use</li>
+            <li><strong>Fill & Generate:</strong> Complete form and generate QR codes</li>
           </ol>
-          
-          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-            <h4 className="font-semibold text-blue-800 mb-2">✨ New Features:</h4>
-            <ul className="list-disc list-inside space-y-1 text-blue-700 text-xs">
-              <li><strong>URL & Location fields</strong> with automatic validation</li>
-              <li><strong>Character validation</strong> with visual feedback and counters</li>
-              <li><strong>Form templates</strong> - save, load, import, and export your forms</li>
-              <li><strong>PWA ready</strong> - works offline and can be installed</li>
-            </ul>
-          </div>
         </div>
         
-            {/* More Prominent Footer */}
-        <footer className="mt-8 sm:mt-16 text-center text-gray-700">
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 sm:p-6 md:p-8 border border-purple-200">
+        {/* Footer */}
+        <footer className="mt-6 text-center text-gray-700">
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
             <div className="max-w-md mx-auto">
-              <p className="text-lg font-semibold text-gray-800 mb-2">
+              <p className="text-sm font-semibold text-gray-800 mb-1">
                 Deftmind Technology and Media Ventures
               </p>
-              <p className="text-sm text-gray-600 mb-3">
-                ...making technology work for everyone!
+              <p className="text-xs text-gray-600 mb-2">
+                Innovative solutions for the digital age
               </p>
+              <p className="text-xs text-gray-500 mb-3">
+                Copyright © {new Date().getFullYear()}. All rights reserved.
+              </p>
+              <a 
+                href="https://deftmindai.com/welcome-to-deftmind-technology-and-media-ventures/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-semibold"
+              >
+                Learn More About Us
+              </a>
             </div>
           </div>
         </footer>
