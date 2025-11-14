@@ -295,36 +295,64 @@ export default function DynamicQRFormBuilder() {
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
       
       script.onload = () => {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.display = 'none';
-        document.body.appendChild(tempDiv);
+        let tempDiv = null; // Define tempDiv outside the inner try
+        try {
+          // 1. Create the hidden div to render the QR code
+          tempDiv = document.createElement('div');
+          tempDiv.style.display = 'none';
+          document.body.appendChild(tempDiv);
 
-        const qr = new window.QRCode(tempDiv, {
-          text: qrDataString,
-          width: 300,
-          height: 300,
-          colorDark: '#000000',
-          colorLight: '#ffffff',
-          correctLevel: window.QRCode.CorrectLevel.H
-        });
+          // 2. Initialize the QR code generator
+          new window.QRCode(tempDiv, {
+            text: qrDataString,
+            width: 300,
+            height: 300,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: window.QRCode.CorrectLevel.H
+          });
 
-        setTimeout(() => {
-          const img = tempDiv.querySelector('img');
-          if (img) {
-            setQrCodeDataUrl(img.src);
-          } else {
-            const canvas = tempDiv.querySelector('canvas');
-            if (canvas) {
-              setQrCodeDataUrl(canvas.toDataURL());
+          // 3. Wait for the QR code to render (as img or canvas)
+          setTimeout(() => {
+            try {
+              const img = tempDiv.querySelector('img');
+              if (img) {
+                setQrCodeDataUrl(img.src);
+              } else {
+                const canvas = tempDiv.querySelector('canvas');
+                if (canvas) {
+                  setQrCodeDataUrl(canvas.toDataURL());
+                } else {
+                  // This will be caught by the inner catch block
+                  throw new Error("QR Code image or canvas not found"); 
+                }
+              }
+            } catch (innerErr) {
+              console.error('Failed to get QR code data URL:', innerErr);
+              alert('Error retrieving generated QR code.');
+            } finally {
+              // 4. (CRITICAL) This *always* runs after the inner try/catch
+              if (tempDiv) {
+                document.body.removeChild(tempDiv);
+              }
+              // 5. (CRITICAL) This stops the "Generating..." message
+              setIsGenerating(false); 
             }
+          }, 100); // 100ms delay to allow rendering
+
+        } catch (outerErr) {
+          // 6. Catch errors from 'new window.QRCode'
+          console.error('Failed to initialize QR code generator:', outerErr);
+          alert('Error initializing QR code generator.');
+          if (tempDiv) {
+            document.body.removeChild(tempDiv);
           }
-          document.body.removeChild(tempDiv);
-          setIsGenerating(false);
-        }, 100);
+          setIsGenerating(false); // Also stop loading here
+        }
       };
 
       script.onerror = () => {
-        alert('Failed to load QR code library');
+        alert('Failed to load QR code library. Please check your internet connection.');
         setIsGenerating(false);
       };
 
@@ -673,14 +701,14 @@ export default function DynamicQRFormBuilder() {
                           value={formData[field.id] || ''}
                           onChange={(e) => updateFormData(field.id, e.target.value)}
                           placeholder="Click button to get location or enter coordinates"
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
                         <button
                           type="button"
+                          onClick={() => getCurrentLocation(field.id)} {/* <-- FIXED: Added onClick */}
                           className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors sm:w-auto w-full"
-  >
-                         📍 Get Location
-                          </button>
+                        >
+                          📍 Get Location
+                        </button>
                       </div>
                     ) : field.type === 'textarea' ? (
                       <textarea
@@ -799,31 +827,20 @@ export default function DynamicQRFormBuilder() {
           </div>
         </div>
         
-               {/* More Prominent Footer */}
-<footer className="mt-8 sm:mt-16 text-center text-gray-700">
-  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 sm:p-6 md:p-8 border border-purple-200">
-    <div className="max-w-md mx-auto">
-      <p className="text-lg font-semibold text-gray-800 mb-2">
-        Deftmind Technology and Media Ventures
-      </p>
-      <p className="text-sm text-gray-600 mb-3">
-        ...making technology work for everyone!
-      </p>
-      <p className="text-xs text-gray-500 mb-4">
-        Copyright © {new Date().getFullYear()}. All rights reserved.
-      </p>
-      <a 
-        href="https://deftmindai.com/welcome-to-deftmind-technology-and-media-ventures/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="inline-block bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold"
-      >
-        Learn More About Us
-      </a>
-    </div>
-  </div>
-</footer>
-    </div>
+            {/* More Prominent Footer */}
+        <footer className="mt-8 sm:mt-16 text-center text-gray-700">
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 sm:p-6 md:p-8 border border-purple-200">
+            <div className="max-w-md mx-auto">
+              <p className="text-lg font-semibold text-gray-800 mb-2">
+                Deftmind Technology and Media Ventures
+              </p>
+              <p className="text-sm text-gray-600 mb-3">
+                ...making technology work for everyone!
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
