@@ -305,7 +305,7 @@ export default function DynamicQRFormBuilder() {
         height: 300,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: window.QRCode.CorrectLevel.H
+        correctLevel: window.QRCode.CorrectLevel.M
       });
 
       // Increased timeout for mobile devices
