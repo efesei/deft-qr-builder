@@ -1,0 +1,9 @@
+{
+  "name": "Deft QR Builder & Generator",
+  "short_name": "Deft QR Generator",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "sizes": "512x512" }
+  ]
+}
